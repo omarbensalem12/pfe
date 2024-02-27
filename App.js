@@ -5,6 +5,7 @@ import { UserContext } from "./UserContext";
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MyProvider } from "./MyContext";
 import i18n from './i18/i18n';
+import 'intl-pluralrules';
 const queryClient = new QueryClient();
 export default function App() {
   i18n.init();
