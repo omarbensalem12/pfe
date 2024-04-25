@@ -85,12 +85,12 @@ export default function Menu({ navigation }) {
 
   const styles = StyleSheet.create({
     card: {
-      width: '40%', // Ajustez la largeur en fonction de vos besoins
+      width: '100%', // Ajustez la largeur en fonction de vos besoins
       alignItems: 'center',
       justifyContent: 'center',
       padding: 10,
       margin: 8,
-      backgroundColor: 'white',
+      backgroundColor: '#BC8F8F',
       borderRadius: 10,
       elevation: 10,
     },
@@ -110,7 +110,7 @@ export default function Menu({ navigation }) {
       backgroundColor: 'white',
     },
     topContainer: {
-      flex: 1,
+      flex: 3,
       justifyContent: 'center',
     },
     dateTimeContainer: {
@@ -137,11 +137,11 @@ export default function Menu({ navigation }) {
       flexDirection: 'row',
       flexWrap: 'wrap',
       justifyContent: 'space-between', // Espacement équitable entre les boutons
-      padding: 10,
+     // padding: 10,
     },
     backgroundImage: {
-      flex: 1,
-      resizeMode: 'cover',
+      width: '100%',
+      height: '100%',
       justifyContent: 'center',
       alignItems: 'center',
     },

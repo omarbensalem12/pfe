@@ -4,28 +4,27 @@ import axios from "axios";
 import { UserType } from "../UserContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
-import { RadioButton, Button, Icon, MD3Colors } from "react-native-paper";
-import logo from "../assets/avatar.png";
-import * as ImagePicker from "expo-image-picker";
-import * as Location from 'expo-location';
+import { RadioButton, Button, IconButton, MD2Colors } from "react-native-paper";
 import { useTranslation } from 'react-i18next';
 import { CheckBox } from 'react-native-elements';
 import 'intl-pluralrules';
 import config from "../config";
-const ProfileScreen = ({ route }) => {
-  const { t, i18n } = useTranslation();
+import SignupContinue from "./signupContinue";
+import * as Location from 'expo-location';
+import * as ImagePicker from "expo-image-picker";
 
-  const [user, setUser] = useState("");
+const ProfileScreen = ({}) => {
+  const [userData, setUserData] = useState(null);
+  const { t, i18n } = useTranslation();
+  const [user, setUser] = useState(null);
   const [id, setId] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isSetting, setIsSetting] = useState(false);
   const navigation = useNavigation();
   const { userId, setUserId } = useContext(UserType);
 
-
   const [image, setImage] = useState(null);
   const [isImagePickerVisible, setImagePickerVisible] = useState(false);
-
 
   const [gender, setGender] = useState("");
   const [lastName, setLastName] = useState("");
@@ -43,25 +42,36 @@ const ProfileScreen = ({ route }) => {
   const [username, setUsername] = useState("");
   const [currentAdress, setCurrentAdress] = useState("");
 
-  useEffect(async () => {
-    try {
-      if (route.params.edit) {
-        setIsEditing(true);
-      }
-    } catch (error) {
+  useEffect(() => {
 
-    }
-    (async () => {
-      const cameraPermission = await ImagePicker.getCameraPermissionsAsync();
-
-      if (cameraPermission.status !== 'granted') {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        if (status !== 'granted') {
-          alert(t("Camera permission is required to take photos."));
+    const fetchUserData = async () => {
+      try {
+        // Récupérer l'objet user à partir d'AsyncStorage
+        const userData = await AsyncStorage.getItem("updatedUser");
+  
+        // Vérifier si des données utilisateur existent dans AsyncStorage
+        if (userData) {
+          // Si des données utilisateur existent, les convertir en objet JavaScript
+          const parsedUserData = JSON.parse(userData);
+  
+          // Extraire les données nécessaires de l'objet user
+          const { username, email, firstName, lastName, phone, address, gender } = parsedUserData;
+  
+          // Mettre à jour les états avec les données récupérées
+          setUsername(username);
+          setEmail(email);
+          setFirstName(firstName);
+          setLastName(lastName);
+          setPhone(phone);
+         setAddress(address);
+          setGender(gender);
         }
+      } catch (error) {
+        console.error("Error fetching user data from AsyncStorage:", error);
       }
-    })();
-
+    };
+  
+    fetchUserData();
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -69,41 +79,9 @@ const ProfileScreen = ({ route }) => {
         return;
       }
 
-      // Get the current location
       let currentLocation = await Location.getCurrentPositionAsync({});
       setCurrentAdress(currentLocation);
     })();
-    const data = await AsyncStorage.getItem("user");
-    setId(JSON.parse(data).id)
-    setavatar(JSON.parse(data).avatar)
-
-    const fetchProfile = async () => {
-      try {
-        const response = await axios.get(
-          `${config.api}/profile/${JSON.parse(data).id}`
-        );
-        const { user } = response.data;
-        setUser(user);
-        setUsername(user.username)
-        setLastName(user.lastName)
-        setFirstName(user.firstName)
-        setEmail(user.email)
-        setPhone(user.phone)
-        setAddress({
-          country: user.address.country,
-          state: user.address.state,
-          city: user.address.city,
-          street: user.address.street,
-          areaCode: user.address.areaCode
-        })
-        setGender(user.gender)
-
-      } catch (error) {
-        console.log("error", error);
-      }
-    };
-
-    fetchProfile();
   }, []);
 
   const fetchAdress = async () => {
@@ -118,12 +96,9 @@ const ProfileScreen = ({ route }) => {
         city: response.data.address.city,
         street: response.data.address.road,
         areaCode: response.data.address.postcode
-      })
-    } catch (error) {
-
-    }
-
-  }
+      });
+    } catch (error) {}
+  };
 
   const logout = () => {
     clearAuthToken();
@@ -139,20 +114,6 @@ const ProfileScreen = ({ route }) => {
     setIsEditing(true);
   };
 
-  const handleSaveProfile = async () => {
-    // Implement the logic to save the edited profile data
-    try {
-      // Make a request to update the user's profile with editedProfile data
-      await axios.put(`${config.api}/profile/${userId}`, editedProfile);
-      // Refresh the profile data
-      const response = await axios.get(`${config.api}/profile/${id}`);
-      const { user } = response.data;
-      setUser(user);
-      setIsEditing(false);
-    } catch (error) {
-      console.log("Error updating profile", error);
-    }
-  };
 
   const handleProfilePicturePress = () => {
     console.log("Change profile picture logic goes here");
@@ -201,9 +162,11 @@ const ProfileScreen = ({ route }) => {
 
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
+    const data = await AsyncStorage.getItem("user");
+
     const formData = new FormData();
-    formData.append("id", id);
+    formData.append("id", JSON.parse(data).id);
 
     formData.append("username", username);
     formData.append("email", email);
@@ -217,17 +180,6 @@ const ProfileScreen = ({ route }) => {
     formData.append("address.street", address.street);
     formData.append("gender", gender);
 
-    try {
-      if (image)
-        formData.append('avatar', {
-          name: 'avatar.png',
-          uri: image,
-          type: 'image/jpg',
-        });
-    } catch (error) {
-
-    }
-    console.log(`${config.api}/api/auth/update`)
     axios
       .put(`${config.api}/api/auth/update`, formData, {
         headers: {
@@ -235,30 +187,32 @@ const ProfileScreen = ({ route }) => {
           'Content-Type': 'multipart/form-data'
         },
       })
-      .then(async (response) => { 
-        const data = await AsyncStorage.getItem("user");
-        // AsyncStorage.setItem("user", JSON.stringify(response.data))
-        try {
-          // console.log(response)   
-
-          AsyncStorage.setItem("user", JSON.stringify( {... JSON.parse(  data),avatar:response.data.avatar,username:response.data.username}));
-          navigation.replace("Main")  
-           
-        } catch (error) { 
-          console.log(response.data)  
-        }
-        // console.log(response);
-        Alert.alert( 
-          "Inscription réussie",
-          "Vous avez été enregistré avec succès"
-        );
+     .then((response) => {
+        // Sauvegarder les données mises à jour dans AsyncStorage
+        AsyncStorage.setItem("updatedUser", JSON.stringify(response.data))
+          .then(() => {
+            // Afficher une alerte pour indiquer la réussite de la mise à jour
+          
+            // Naviguer vers l'écran principal
+          
+            setIsEditing(false);
+          })
+          .catch(error => {
+            // Gérer les erreurs de sauvegarde dans AsyncStorage
+            console.error("Error saving updated user data to AsyncStorage:", error);
+            Alert.alert(
+              t("Registration failed"),
+              t("An error occurred during registration")
+            );
+          });
       })
       .catch(error => {
+        // Gérer les erreurs de requête PUT
+        console.error("Error updating user data:", error);
         Alert.alert(
-          "Échec de l'inscription",
-          "Une erreur s'est produite lors de l'inscription"
+          t("Registration failed"),
+          t("An error occurred during registration")
         );
-        // console.log("error", JSON.stringify(error));
       });
   };
 
@@ -293,7 +247,6 @@ const ProfileScreen = ({ route }) => {
         </View>
 
         <View style={styles.profileDetails}>
-
           <TouchableOpacity onPress={handleProfilePicturePress}>
             {avatar ? (
               <Image
@@ -321,29 +274,11 @@ const ProfileScreen = ({ route }) => {
         <Text style={styles.followersText}>{user?.followers?.length} {t("followers")}</Text>
 
         <View style={styles.actionButtons}>
-          <TouchableOpacity
-            onPress={isEditing ? handleUpdate : handleEditProfile}
-            style={[styles.button, styles.editButton]}
-          >
-            <Text style={styles.buttonText}>{isEditing ? t("Save") : t("To modify")}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={logout} style={[styles.button]}>
-            <Icon
-              source="logout"
-              color={"red"}
-              size={50}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => { setIsEditing(false); setIsSetting(!isSetting) }} style={[styles.button]}>
-            <Icon
-              source="account-cog"
-              color={"#0000FF"}
-              size={50}
-            />
-          </TouchableOpacity>
-
-
+          <Button icon="pencil" mode="contained" onPress={isEditing ? handleUpdate : handleEditProfile}>
+            {isEditing ? t("Save") : t("To modify")}
+          </Button>
+          <IconButton icon="logout" color={MD2Colors.red500} size={30} onPress={logout} />
+          <IconButton icon="account-settings" color={MD2Colors.blue500} size={30} onPress={() => { setIsEditing(false); setIsSetting(!isSetting) }} />
         </View>
       </View>
       {isSetting && (
@@ -393,7 +328,7 @@ const ProfileScreen = ({ route }) => {
           >
             <Image source={image ? { uri: image } : { uri: "https://cdn-icons-png.flaticon.com/128/149/149071.png" }} style={styles.image} />
           </TouchableOpacity>
-          <Button icon="apple-safari" mode="contained" onPress={fetchAdress}>
+          <Button icon="map-marker" mode="contained" onPress={fetchAdress}>
             {t("current location")}
           </Button>
           <TextInput
@@ -460,201 +395,172 @@ const ProfileScreen = ({ route }) => {
           />
 
           <TextInput
-            placeholder={t("Postal code")}
+            placeholder={t("Zip code")}
             value={address.areaCode}
             onChangeText={(text) => setAddress({ ...address, areaCode: text })}
             style={styles.input}
           />
 
-          <RadioButton.Group justifyContent="center" onValueChange={(newValue) => setGender(newValue)} value={gender}>
-            <View style={styles.radioOption}>
-              <Text style={styles.radioLabel}>{t("Man")}</Text>
-              <RadioButton value="male" />
-            </View>
-            <View style={styles.radioOption}>
-              <Text style={styles.radioLabel}>{t("Women")}</Text>
-              <RadioButton value="female" />
-            </View>
-          </RadioButton.Group>
-
-          <TouchableOpacity
-            onPress={handleUpdate}
-            style={[styles.button, styles.updateButton]}
-          >
-            <Text style={styles.buttonText}>{t("To update")}</Text>
-          </TouchableOpacity>
+          <View style={styles.radioButtonsContainer}>
+            <RadioButton.Group onValueChange={newValue => setGender(newValue)} value={gender}>
+              <View style={styles.radioButtonRow}>
+                <Text>{t("Male")}</Text>
+                <RadioButton value="male" />
+              </View>
+              <View style={styles.radioButtonRow}>
+                <Text>{t("Female")}</Text>
+                <RadioButton value="female" />
+              </View>
+              <View style={styles.radioButtonRow}>
+                <Text>{t("Other")}</Text>
+                <RadioButton value="other" />
+              </View>
+            </RadioButton.Group>
+          </View>
         </ScrollView>
       )}
+
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  flagImage: {
-    width: 30, // Ajustez la largeur en fonction de vos besoins
-    height: 30, // Ajustez la hauteur en fonction de vos besoins 
-    marginLeft: 120, // Ajustez la marge en fonction de vos besoins  
-  },
   container: {
-    marginTop: 55,
-    padding: 15,
-    backgroundColor: "#F7F7F7",
     flex: 1,
+    backgroundColor: "#fff",
   },
   profileContainer: {
-    backgroundColor: "#FFFFFF",
     padding: 20,
-    borderRadius: 15,
-    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
   },
   header: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
   },
   headerText: {
     fontSize: 20,
     fontWeight: "bold",
   },
   statusIndicator: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#4CAF50", // Ajoutez la logique de statut ici
+    height: 20,
+    width: 20,
+    borderRadius: 10,
+    backgroundColor: "#2ecc71",
   },
   profileDetails: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 15,
   },
   profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    resizeMode: "cover",
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
   textDetails: {
-    marginLeft: 15,
-    height: 100
+    marginLeft: 20,
   },
   textUsername: {
     fontSize: 18,
     fontWeight: "bold",
   },
   textEmail: {
-    fontSize: 15,
-    fontWeight: "400",
-    color: "gray",
+    fontSize: 16,
+    color: "#777",
   },
   textAddress: {
-    fontSize: 15,
-    fontWeight: "400",
-    color: "gray",
-    flex: 1,
-    textAlign: 'left',
-    overflow: "hidden"
-
+    fontSize: 16,
+    color: "#777",
   },
   followersText: {
-    color: "gray",
-    fontSize: 15,
-    marginTop: 10,
+    marginTop: 20,
+    marginBottom: 10,
+    fontSize: 18,
+    fontWeight: "bold",
   },
   actionButtons: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    marginTop: 20,
   },
   button: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#333",
+    width: "30%",
+    alignItems: "center",
+  },
+  buttonText: {
+    fontSize: 16,
   },
   editButton: {
-    backgroundColor: "#0000FF",
-    marginRight: 10,
+    backgroundColor: "#3498db",
+    color: "#fff",
   },
-  logoutButton: {
-    backgroundColor: "#FF0000",
-    marginLeft: 10,
+  checkButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 20,
   },
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "bold",
+  checkButton: {
+    backgroundColor: "#fff",
+    borderWidth: 0,
+    paddingHorizontal: 0,
+  },
+  checkButtonText: {
+    fontSize: 20,
+    color: "#333",
+  },
+  flagImage: {
+    width: 50,
+    height: 30,
   },
   editProfileForm: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 15,
     padding: 20,
-    marginTop: 20,
   },
-  buttonsContainer: {
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
+  radioButtonsContainer: {
+    marginBottom: 20,
+  },
+  radioButtonRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 20,
-  },
-  editSaveButton: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 15,
-    backgroundColor: "#0000FF",
-    borderRadius: 5,
-  },
-  logoutButton: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 15,
-    backgroundColor: "#DB4437",
-    borderRadius: 5,
-    // marginLeft: 10,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 14,
+    marginBottom: 10,
   },
   imagePickerContainer: {
     alignItems: "center",
     marginBottom: 20,
   },
   image: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    resizeMode: "cover",
+    width: 200,
+    height: 200,
+    borderRadius: 100,
   },
   imagePickerModal: {
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    padding: 20,
-    borderRadius: 10,
-    width: "80%",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: "100%", // Vous pouvez ajuster cette valeur selon vos besoins
-    marginBottom: "50%", // Vous pouvez ajuster cette valeur selon vos besoins
-    marginLeft: "auto",
-    marginRight: "auto",
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   imagePickerOption: {
-    marginVertical: 10,
-    borderBottomColor: "#FFFFFF", // Couleur de la ligne blanche entre les options
-    borderBottomWidth: 1, // Épaisseur de la ligne blanche entre les options
-    borderTopColor: "#FFFFFF", // Ajoutez cette ligne pour la bordure supérieure
-    borderTopWidth: 1, // Ajoutez cette ligne pour la bordure supérieure
-  },
-
-  cancelButton: {
-    marginVertical: 10,
-    borderBottomColor: "#FFFFFF", // Couleur de la ligne blanche entre les options
-    borderBottomWidth: 1, // Épaisseur de la ligne blanche entre les options
-    borderTopColor: "#FFFFFF", // Ajoutez cette ligne pour la bordure supérieure
+    backgroundColor: '#fff',
+    padding: 20,
     borderTopWidth: 1,
+    borderTopColor: '#ccc',
+  },
+  cancelButton: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#ccc',
+    marginTop: 10,
   },
 });
 

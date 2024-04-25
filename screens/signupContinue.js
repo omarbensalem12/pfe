@@ -62,22 +62,38 @@ const SignupContinue = ({ route }) => {
     formData.append("address.areaCode", address.areaCode);
     formData.append("address.street", address.street);
     formData.append("gender", gender);
-
+  
     axios
-      .put(`${config.api}/api/auth/update`, formData, {
+      .put(`${config.api}/api/auth/update,formData`, {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'multipart/form-data'
         },
       })
       .then((response) => {
-        Alert.alert(
-          t("successful registration"),
-          t("You have been successfully registered")
-        );
-        navigation.navigate("Main");
+        // Sauvegarder les données mises à jour dans AsyncStorage
+        AsyncStorage.setItem("updatedUser", JSON.stringify(response.data))
+          .then(() => {
+            // Afficher une alerte pour indiquer la réussite de la mise à jour
+            Alert.alert(
+              t("successful registration"),
+              t("You have been successfully registered")
+            );
+            // Naviguer vers l'écran principal
+            navigation.navigate("Main");
+          })
+          .catch(error => {
+            // Gérer les erreurs de sauvegarde dans AsyncStorage
+            console.error("Error saving updated user data to AsyncStorage:", error);
+            Alert.alert(
+              t("Registration failed"),
+              t("An error occurred during registration")
+            );
+          });
       })
       .catch(error => {
+        // Gérer les erreurs de requête PUT
+        console.error("Error updating user data:", error);
         Alert.alert(
           t("Registration failed"),
           t("An error occurred during registration")

@@ -204,21 +204,52 @@ exports.deleteParkingSpot = async (req, res) => {
     }
 }
 
+// exports.cancelReservation = async (req, res) => {
+//     const { reservationId } = req.query
+//     Reservation.findByIdAndUpdate(reservationId, { reservationStatus: "Canceled" }, { new: true })
+//         .then((updatedDocument) => {
+//             if (updatedDocument) {
+//                 res.status(201).json({ message: "Updated document" })
+//             } else {
+//                 res.status(500).json({ message: "Document not found." })
+//             }
+//         })
+//         .catch((error) => {
+//             res.status(500).json({ message: "Error updating document" })
+//             console.error('Error updating document:', error);
+//         })
+// }
 exports.cancelReservation = async (req, res) => {
     const { reservationId } = req.query
-    Reservation.findByIdAndUpdate(reservationId, { reservationStatus: "Canceled" }, { new: true })
-        .then((updatedDocument) => {
+  
+    // Add logging to see if the reservation ID is being received correctly
+    console.log(`Cancel reservation request received for ID: ${reservationId}`)
+  
+    Reservation.findById(reservationId)
+      .then((reservation) => {
+        if (!reservation) {
+          // Add logging to see if the reservation was found in the database
+          console.log(`Reservation with ID ${reservationId} not found`)
+  
+          return res.status(404).json({ message: "Reservation not found." })
+        }
+  
+        Reservation.findByIdAndDelete(reservationId)
+          .then((updatedDocument) => {
             if (updatedDocument) {
-                res.status(201).json({ message: "Updated document" })
-            } else {
-                res.status(500).json({ message: "Document not found." })
+              res.status(204).json({ message: "Reservation deleted" })
             }
-        })
-        .catch((error) => {
-            res.status(500).json({ message: "Error updating document" })
-            console.error('Error updating document:', error);
-        })
-}
+          })
+          .catch((error) => {
+            res.status(500).json({ message: "Error deleting reservation" })
+            console.error('Error deleting reservation:', error);
+          })
+      })
+      .catch((error) => {
+        res.status(500).json({ message: "Error fetching reservation" })
+        console.error('Error fetching reservation:', error);
+      })
+  }
 
 exports.getAvailableParkingSpots = async (req, res) => {
     const { startDate, finishDate, parkingLotId } = req.query
@@ -375,3 +406,54 @@ async function findParkingLotsNearby() {
         throw error;
     }
 }
+async function updateExpiredReservations() {
+    try {
+        // Recherche des réservations expirées
+        const expiredReservations = await Reservation.find({
+            finishDate: { $lt: new Date() }, // Trouve les réservations dont la date de fin est antérieure à la date actuelle
+            reservationStatus: { $ne: 'Done' } // Assurez-vous de ne pas mettre à jour les réservations déjà marquées comme "Done"
+        });
+
+        // Mettre à jour les réservations expirées
+        for (const reservation of expiredReservations) {
+            reservation.reservationStatus = 'Done'; // Met à jour le statut de la réservation
+            await reservation.save(); // Enregistre la mise à jour dans la base de données
+        }
+
+        console.log('Expired reservations updated successfully.');
+    } catch (error) {
+        console.error('Error updating expired reservations:', error);
+    }
+}
+async function updateCurrentReservations() {
+    try {
+        // Recherche des réservations dont la date de début est atteinte mais qui ne sont pas encore marquées comme "current"
+        const currentReservations = await Reservation.find({
+            startDate: { $lte: new Date() }, // Trouve les réservations dont la date de début est antérieure ou égale à la date actuelle
+            reservationStatus: { $ne: 'Current' }, // Assurez-vous de ne pas mettre à jour les réservations déjà marquées comme "Current"
+            finishDate: { $gt: new Date() } // Assurez-vous que la date de fin est postérieure à la date actuelle pour éviter de marquer les réservations expirées comme "Current"
+        });
+
+        // Mettre à jour les réservations dont la date de début est atteinte
+        for (const reservation of currentReservations) {
+            reservation.reservationStatus = 'Current'; // Met à jour le statut de la réservation
+            await reservation.save(); // Enregistre la mise à jour dans la base de données
+        }
+
+        console.log('Current reservations updated successfully.');
+    } catch (error) {
+        console.error('Error updating current reservations:', error);
+    }
+}
+
+const cron = require('node-cron');
+
+// Planifiez la tâche pour s'exécuter toutes les minutes
+cron.schedule('* * * * *', () => {
+  //  updateExpiredReservations();
+    updateCurrentReservations(); // Appeler la fonction pour mettre à jour les réservations actuelles
+});
+cron.schedule('* * * * *', () => {
+    updateExpiredReservations();
+    //updateCurrentReservations(); // Appeler la fonction pour mettre à jour les réservations actuelles
+  });

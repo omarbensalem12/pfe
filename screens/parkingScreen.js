@@ -17,9 +17,8 @@ import { useTranslation } from 'react-i18next';
 import 'intl-pluralrules';
 import config from '../config';
 import Reservation from './reservationScreen';
-import ReservationList from './reservationListScreen';
 import { Linking } from 'react-native';
-
+import ReservationList from './reservationListScreen';
 
 
 
@@ -112,9 +111,9 @@ export default function ParkingMap({ navigation }) {
     
     // const fetchLampposts = async () => {
     //     const data = await AsyncStorage.getItem("user");
-    //     const response = await axios.get(`${config.api}/api/parking/getParkingLotsNearby`, {
+    //     const response = await axios.get(${config.api}/api/parking/getParkingLotsNearby, {
     //         headers: {
-    //             Authorization: `${JSON.parse(data).token}`,
+    //             Authorization: ${JSON.parse(data).token},
     //         },
     //     });
     
@@ -126,9 +125,9 @@ export default function ParkingMap({ navigation }) {
     //     const parkingLotsWithDistance = await Promise.all(
     //         response.data.map(async (parkingLot) => {
     //             try {
-    //                 const end = `${parkingLot.longitude},${parkingLot.latitude}`;
+    //                 const end = ${parkingLot.longitude},${parkingLot.latitude};
     //                 const directionsResponse = await fetch(
-    //                     `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&start=${userLocation.longitude},${userLocation.latitude}&end=${end}`
+    //                     https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&start=${userLocation.longitude},${userLocation.latitude}&end=${end}
     //                 );
     //                 const directionsData = await directionsResponse.json();
     
@@ -163,7 +162,7 @@ export default function ParkingMap({ navigation }) {
     //     });
     
     //     if (filteredParkingLots.length) {
-    //         alert(`${filteredParkingLots.length} parking lots within ${searchRange} km range.`);
+    //         alert(${filteredParkingLots.length} parking lots within ${searchRange} km range.);
     //     }
     
     //     return filteredParkingLots;
@@ -208,7 +207,7 @@ export default function ParkingMap({ navigation }) {
     };
 
     // const getRoad = (s) => {
-    //     axios.get(`http://router.project-osrm.org/route/v1/foot/${s.longitude},${s.latitude};${initialView.longitude},${initialView.latitude}?steps=true`)
+    //     axios.get(http://router.project-osrm.org/route/v1/foot/${s.longitude},${s.latitude};${initialView.longitude},${initialView.latitude}?steps=true)
     //         .then(res => { setroad(res.data.routes[0].legs[0].steps[0].intersections.map(el2 => { return el2.location })) })
     //         .catch(err => { console.log(err); })
     // }
@@ -229,113 +228,95 @@ export default function ParkingMap({ navigation }) {
                 onRequestClose={() => {
                     Alert.alert('Modal has been closed.');
                     setShowParking(false);
-                    ; setSelectedParkingIndex(-1)
-                }}>
+                    setSelectedParkingIndex(-1);
+                }}
+            >
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <Pressable
                             style={[styles.buttonClose]}
-                            onPress={() => { setShowParking(false); setSelectedParkingIndex(-1) }}>
+                            onPress={() => { setShowParking(false); setSelectedParkingIndex(-1) }}
+                        >
                             <Text style={styles.textStyle}>X</Text>
                         </Pressable>
                         <Pressable
                             style={[styles.button, styles.buttonOpen]}
                             onPress={() => {
-                                setShowParking(false); setTimeout(() => {
+                                setShowParking(false);
+                                setTimeout(() => {
                                     setSelectedParkingIndex(-1);
-                                }, 500); console.log(selectedParkingIndex); setSelectedparking(lamppostsData[selectedParkingIndex])
-                            }}>
+                                }, 500);
+                                console.log(selectedParkingIndex);
+                                setSelectedparking(lamppostsData[selectedParkingIndex]);
+                            }}
+                        >
                             <Text style={styles.text}>{t("book")}</Text>
                         </Pressable>
-
-                        <Pressable
-    style={[styles.button, styles.buttonOpen]}
-    onPress={() => {
-        getRoute(lamppostsData[selectedParkingIndex]);
-        setShowParking(false);
-
     
-        Alert.alert(
-            "Guide pour la route",
-            "Tu veux un guide pour la route ?",
-            [
-                {
-                    text: "Non",
-                    onPress: () => {
-                        
-                    },
-                    style: "cancel",
-                },
-                {
-                    text: "Oui",
-                    onPress: () => {
-                        
-                        const destination = lamppostsData[selectedParkingIndex];
-                        const url = `https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}`;
-                        Linking.openURL(url);
-                    },
-                },
-            ],
-            { cancelable: false }
-        );
-    }}
->
-    <Text style={styles.text}>{t("road")}</Text>
-</Pressable>
-
-
-                           
-                            
-                            
-                        
                         <Pressable
                             style={[styles.button, styles.buttonOpen]}
-                            onPress={() => { setroad([]); setShowParking(false) }}>
+                            onPress={() => {
+                                getRoute(lamppostsData[selectedParkingIndex]);
+                                setShowParking(false);
+                                Alert.alert(
+                                    "Guide pour la route",
+                                    "Tu veux un guide pour la route ?",
+                                    [
+                                        {
+                                            text: "Non",
+                                            onPress: () => {},
+                                            style: "cancel",
+                                        },
+                                        {
+                                            text: "Oui",
+                                            onPress: () => {
+                                                const destination = lamppostsData[selectedParkingIndex];
+                                                const url = `https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}`;
+                                                Linking.openURL(url);
+                                            },
+                                        },
+                                    ],
+                                    { cancelable: false }
+                                );
+                            }}
+                        >
+                            <Text style={styles.text}>{t("road")}</Text>
+                        </Pressable>
+    
+                        <Pressable
+                            style={[styles.button, styles.buttonOpen]}
+                            onPress={() => { setroad([]); setShowParking(false) }}
+                        >
                             <Text style={styles.text}>{t("hide road")}</Text>
                         </Pressable>
                     </View>
                 </View>
             </Modal>
-
-            {
-                selectedparking && (
-                    <Reservation setNoParking={setNoParking} selectedparking={selectedparking} />
-                )
-            }
-
-            {
-                (!selectedparking && !showReservatioList) &&
+    
+            {selectedparking && (
+                <Reservation setNoParking={setNoParking} selectedparking={selectedparking} />
+            )}
+    
+            {(!selectedparking && !showReservatioList) && (
                 <View>
-                    <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 10 }} >
-                        <Button
-                            style={styles.backButton}
-                            labelStyle={{ color: "#FFF" }}
-                            onPress={() => {
-                                setShowReservatioList(true)
-                            }}
-                        >
-                            {t("Resevations")}
-                        </Button>
-                        <View style={{ paddingTop: 20, display: "flex", alignItems: "center" }}>
-                <Text>{searchRange} Km</Text>
-                <Slider
-                   onValueChange={(value) => { setSearchRange(value) }}  
-                   onSlidingComplete={refetch}
-                   style={{ width: 200, height: 40 }}
-                    minimumValue={1}
-                    maximumValue={20}
-                    step={1}  
-                    value={searchRange}
-                    thumbTouchSize={{ width: 40, height: 40 }} 
-                   />
-
-            </View>
-
+                    <View style={{ display: "flex", flexDirection: "row", justifyContent: "flex-end", alignItems: "center", marginRight: 10, marginLeft: 10 }} >
+                        <View style={{ flex: 1, paddingTop: 30, display: "flex", alignItems: "center" }}>
+                            <Text>{searchRange} Km</Text>
+                            <Slider
+                                onValueChange={(value) => { setSearchRange(value) }}
+                                onSlidingComplete={refetch}
+                                style={{ width: "100%", height: 40 }}
+                                minimumValue={1}
+                                maximumValue={20}
+                                step={1}
+                                value={searchRange}
+                                thumbTouchSize={{ width: 40, height: 40 }}
+                            />
+                        </View>
                     </View>
-
+    
                     <MapView style={styles.map} region={initialView} >
-
-
+    
                         <Marker
                             coordinate={{
                                 latitude: Number(initialView.latitude),
@@ -351,7 +332,7 @@ export default function ParkingMap({ navigation }) {
                                 </View>
                             </Callout>
                         </Marker>
-
+    
                         {lamppostsData.map((el, i) => {
                             const markerKey = i.toString();
                             return (
@@ -377,7 +358,6 @@ export default function ParkingMap({ navigation }) {
                                         </View>
                                     </Callout>
                                 </Marker>
-
                             );
                         })}
                         <Polyline
@@ -385,18 +365,12 @@ export default function ParkingMap({ navigation }) {
                             strokeWidth={3}
                             strokeColor="hotpink"
                         />
-
                     </MapView>
                 </View>
-
-            }
-
-            {
-                showReservatioList && <ReservationList hide={() => { setShowReservatioList(false) }} />
-            }
-
+            )}
         </View>
-    )
+    );
+    
 
 }
 

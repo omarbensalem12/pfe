@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Dimensions, StyleSheet, Text, Image, TextInput, Alert, Modal, Pressable, TouchableOpacity, ScrollView, FlatList } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import car1 from '../assets/blackcar1.png';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import config from '../config';
 import axios from 'axios';
@@ -7,7 +10,8 @@ import { Picker } from '@react-native-picker/picker';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'react-native-paper';
 import QRCode from 'react-native-qrcode-svg';
-
+import { ImageBackground } from 'react-native';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 const Calendaricon = require('../assets/calendar.png');
 const Clockicon = require('../assets/clock.png');
@@ -15,7 +19,6 @@ const Obteniricon = require('../assets/obtenir.png');
 const Reserveicon = require('../assets/reserve.png');
 const Unavailableicon = require('../assets/unavailable.png');
 const Bookicon = require('../assets/book.png');
-
 const carIcon = require("../assets/car.png");
 const busIcon = require("../assets/bus.png");
 const bycicleIcon = require("../assets/bycicle.png");
@@ -66,9 +69,6 @@ export default function Reservation({ navigation, selectedparking, setNoParking 
     const [Starttime, setStarttime] = useState(new Date());
     const [finishDate, setfinishDate] = useState(new Date());
     const [finishTime, setfinishTime] = useState(new Date());
-
-
-
     const getStart = () => {
         const hour = Starttime.getHours() < 10 ? "0" + Starttime.getHours() : Starttime.getHours()
         const minute = Starttime.getMinutes() < 10 ? "0" + Starttime.getMinutes() : Starttime.getMinutes()
@@ -134,7 +134,7 @@ export default function Reservation({ navigation, selectedparking, setNoParking 
 
         })
     }
-
+    
 
     const renderCard = (button) => (
         <TouchableOpacity
@@ -147,11 +147,11 @@ export default function Reservation({ navigation, selectedparking, setNoParking 
         </TouchableOpacity>
     );
 
-
-
-
     return (
+
         <View style={{ flex: 1, backgroundColor: "white" }}>
+
+
 
             {SpotType &&
                 <View style={{ paddingTop: (Dimensions.get('window').height * 0.05) }}>
@@ -285,131 +285,240 @@ export default function Reservation({ navigation, selectedparking, setNoParking 
                                         source={Obteniricon}
                                     />  {t("get available spots")} </Text>
                             </Pressable>
+
+
                         </View>
+
+
+
+
+
+
                     </View>}
 
+
+
                     <ScrollView style={{ height: Dimensions.get('window').height * 0.9 }}>
-                        {
-                            currentStep == "search" &&
 
-                            <View style={{ width: Dimensions.get('window').width * 0.9 }}>
 
-                                <Button
-                                    style={styles.backButton}
-                                    labelStyle={{ color: "#FFF" }}
-                                    onPress={() => {
-                                        setCurrentStep("")
-                                    }}
-                                >
-                                    {t("Back to Date")}
-                                </Button>
+                        {currentStep === 'search' && (
 
-                                {
-                                    chunkArray(selectedparking.parkingSpots, 6).map((el, i) => {
-                                        return (
-                                            <View style={{ width: Dimensions.get('window').width * 0.9, height: Dimensions.get('window').height * 0.45, display: "flex", flexDirection: "row", flexWrap: "wrap", alignContent: "center", paddingLeft: Dimensions.get('window').width * 0.05 }} key={i}>
-                                                {el.map((el1) => {
-                                                    return (
-                                                        <View key={el1._id} style={{ borderWidth: 1, borderColor: "black", width: Dimensions.get('window').width * 0.42, height: Dimensions.get('window').height * 0.11, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                                                            {reservedSpots.includes(el1._id) && <Image source={blackcarIcon} style={{ width: Dimensions.get('window').width * 0.4, height: Dimensions.get('window').height * 0.1 }} />}
-                                                            {!reservedSpots.includes(el1._id) &&
-                                                                <Pressable onPress={() => { setSelectedSpot(el1), setCurrentStep("reservation") }} style={({ pressed }) => [
-                                                                    { width: Dimensions.get('window').width * 0.4, height: Dimensions.get('window').height * 0.1, display: "flex", justifyContent: "center", backgroundColor: "#dfe2e5" },
-                                                                    {
-                                                                        opacity: pressed ? 0.5 : 1,
-                                                                    },
-                                                                    // Add other styles or effects here
-                                                                ]}   >
-                                                                    <Text style={{ textAlign: "center", fontSize: 26, fontWeight: 900 }}> {el1.name} </Text>
-                                                                </Pressable>
-                                                            }
+                            <View style={{
+                                width: '100%', padding: 10
+                            }}>
+                                <View style={{
+                                    flex: 1, marginBottom: 10
+                                }}>
+                                    <View style={[styles.card, styles.shadowProp]}>
+                                        <View style={{
+                                            backgroundColor: 'white',
+                                            borderRadius: 10,
+                                            padding: 20,
+                                            margin: 10,
+                                        }}>
+                                            <Button
+
+                                                style={{
+                                                    height: 30,
+                                                    fontSize: 25,
+                                                    position: 'absolute',
+                                                    top: -10,
+                                                    left: -170,
+
+                                                }}
+                                                onPress={() => setCurrentStep('')}
+
+
+                                            >
+                                                <View style={{
+                                                    flex: 1,
+                                                    justifyContent: 'flex-start',
+                                                    alignItems: 'flex-end',
+                                                    marginTop: 50, // Marge pour décaler l'icône du haut de l'écran
+                                                    marginRight: 20
+                                                }}>
+                                                    <View style={{ backgroundColor: 'white' }}>
+                                                        <Ionicons name='arrow-back-sharp' style={{
+                                                            height: 30,
+                                                            fontSize: 25,
+                                                            marginTop: -10
+                                                        }} />
+                                                    </View>
+                                                </View>
+
+
+                                            </Button>
+
+                                        </View>
+                                        <View>
+                                            < Text style={{
+                                                fontSize: 24,
+                                                fontWeight: 'bold',
+                                                textAlign: 'center',
+                                                color: '#0C2D57'
+
+
+                                            }}>Park Zone</Text>
+                                        </View>
+                                    </View>
+                                </View>
+
+
+
+
+
+
+                                {chunkArray(selectedparking.parkingSpots, 2).map((pair, pairIndex) => (
+                                    <View
+                                        key={pairIndex}
+                                        style={{
+                                            flexDirection: 'row',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                        }}
+                                    >
+
+                                        {pair.map((spot, spotIndex) => (
+                                            <React.Fragment key={spot._id}>
+                                                <View
+                                                    style={{
+                                                        width: '30%', // 30% for each spot
+                                                        aspectRatio: 2 / 1,
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        borderWidth: 0.3,
+                                                        borderColor: 'black',
+                                                        overflow: 'hidden',
+                                                        marginRight: spotIndex === 0 ? '20%' : 0, // Ajout de la marge à droite pour la première place
+                                                        borderTopRightRadius: pairIndex === 0 && spotIndex === 0 ? 17 : 0, // Ajout du borderRadius top-right uniquement pour la première place à gauche
+                                                        borderBottomRightRadius: (pairIndex === selectedparking.parkingSpots.length / 2 - 1 && spotIndex === 0) ? 17 : 0, // Ajout du borderRadius bottom-right uniquement pour la dernière place à gauche
+                                                        borderTopLeftRadius: pairIndex === 0 && spotIndex === 1 ? 17 : 0, // Ajout du borderRadius top-left uniquement pour la première place à droite
+                                                        borderBottomLeftRadius: (pairIndex === selectedparking.parkingSpots.length / 2 - 1 && spotIndex === 1) ? 17 : 0, // Ajout du borderRadius bottom-left uniquement pour la dernière place à droite
+                                                    }}
+                                                >
+                                                    {reservedSpots.includes(spot._id) && (
+                                                        <View
+                                                            style={{
+                                                                width: '100%',
+                                                                height: '100%',
+                                                                justifyContent: 'center',
+                                                                alignItems: 'center',
+                                                            }}
+                                                        >
+                                                            <View
+                                                                style={{
+                                                                    width: '60%', // Ajustez la taille de la place selon vos besoins
+                                                                    aspectRatio: 1, // Assurez-vous que la place conserve son aspect carré
+                                                                    overflow: 'hidden',
+
+                                                                }}
+                                                            >
+                                                                <ImageBackground
+                                                                    source={blackcarIcon}
+                                                                    style={{
+                                                                        width: '100%',
+                                                                        height: '100%',
+                                                                        resizeMode: 'contain', // Utilisez 'contain' pour garder l'image dans les limites tout en préservant les proportions
+                                                                        justifyContent: 'center',
+                                                                        alignItems: 'center',
+                                                                    }}
+                                                                >
+                                                                    {/* Ajoutez du contenu supplémentaire au besoin */}
+                                                                    {/* <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold' }}>
+                      {spot.name}
+                    </Text> */}
+                                                                </ImageBackground>
+                                                            </View>
                                                         </View>
-                                                    )
+                                                    )}
 
-                                                })}
-                                            </View>
-                                        )
-                                        // return (
-                                        //     <View key={el._id} style={{ borderWidth: 1, borderRadius: 10, padding: 5, margin: 5 }}>
-                                        //         <View>
-                                        //             <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                                        //                 <View style={{ position: "relative" }} >
-                                        //                     <Image
-                                        //                         style={{
-                                        //                             width: 100,
-                                        //                             height: 100,
-                                        //                             borderRadius: 20,
-                                        //                             resizeMode: "contain",
-                                        //                         }}
-                                        //                         source={{
-                                        //                             uri: (selectedparking.images[0] ? `${config.api}/api/images/${selectedparking.images[0]}` : "https://cdn-icons-png.flaticon.com/128/149/149071.png"),
-                                        //                         }}
-                                        //                     />
-                                        //                     <Text style={{
-                                        //                         margin: 5, position: "absolute", color: 'white', // Set text color to white
-                                        //                         textShadowColor: 'rgba(0, 0, 0, 0.75)', // Shadow color (black with 75% opacity)
-                                        //                         textShadowOffset: { width: 2, height: 2 }, // Shadow offset (x, y)
-                                        //                         textShadowRadius: 5, // Shadow radius
-                                        //                         fontSize: 24,
-                                        //                         textAlign: "center",
-                                        //                         width: 100,
-                                        //                         marginTop: 20,
+{
+  !reservedSpots.includes(spot._id) && (
+    <Pressable
+      onPress={() => {
+        if (selectedSpot && selectedSpot._id === spot._id) {
+          // If the same spot is clicked again, unselect it
+          setSelectedSpot(null);
+        } else {
+          // Otherwise, select the spot
+          setSelectedSpot(spot);
+        }
+      }}
+      style={({ pressed }) => [
+        {
+          width: '80%',
+          height: '80%',
+          display: 'flex',
+          justifyContent: 'center',
+          backgroundColor: 'white',
+        },
+        {
+          opacity: pressed ? 0.5 : 1,
+        },
+        // Add other styles or effects here
+      ]}
+    >
+      <Text style={{ textAlign: 'center', fontSize: 16, fontWeight: 600, color: selectedSpot && selectedSpot._id === spot._id ? 'blue' : 'black' }}>
+        {spot.name}
+      </Text>
+    </Pressable>
+  )
+}
 
-                                        //                     }}>
-                                        //                         {el.name}
-                                        //                     </Text>
-                                        //                 </View>
-                                        //                 <View>
-                                        //                     <Text style={{ margin: 5, fontWeight: 900, fontSize: 18 }}>
-                                        //                         {el.pricePerHour} dt/h
-                                        //                     </Text>
-                                        //                 </View>
-                                        //                 {
-                                        //                     !reservedSpots.includes(el._id) &&
-                                        //                     <View style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                        //                         <Pressable onPress={() => { setSelectedSpot(el), setCurrentStep("reservation") }} style={{ ...styles.button, borderWidth: 0, backgroundColor: "white" }} >
-                                        //                             <Image
-                                        //                                 style={{
-                                        //                                     width: 50,
-                                        //                                     height: 50,
-                                        //                                     resizeMode: "contain",
-                                        //                                 }}
-                                        //                                 source={Reserveicon}
-                                        //                             />
-                                        //                         </Pressable>
-                                        //                     </View>
-                                        //                 }
-                                        //                 {
-                                        //                     reservedSpots.includes(el._id) &&
-                                        //                     <View style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                        //                         <Pressable style={{ ...styles.button, borderWidth: 0, backgroundColor: "white" }} >
-                                        //                             <Image
-                                        //                                 style={{
-                                        //                                     width: 50,
-                                        //                                     height: 50,
-                                        //                                     resizeMode: "contain",
-                                        //                                 }}
-                                        //                                 source={Unavailableicon}
-                                        //                             />
-                                        //                         </Pressable>
-                                        //                     </View>
-                                        //                 }
-                                        //             </View>
 
-                                        //             {/* <Text style={{ margin: 5 }}>
-                                        //         {t("spotType")} : {el.spotType}
-                                        //     </Text> */}
+                                                </View>
 
-                                        //         </View>
+                                                {spotIndex === 0 && <View style={{ width: '20%' /* Adjusted space width */ }} />}
+                                            </React.Fragment>
+                                        ))}
 
-                                        //     </View>
-                                        //     // <Text key={el._id}>
-                                        //     //     {JSON.stringify(el)}
-                                        //     // </Text>
-                                        // )
-                                    })}
+                                    </View>
+
+                                ))}
+                                <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center' }} >
+
+                                </View>
+                                <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
+                                    <Text style={{
+                                        color: '#B5C0D0',
+                                        fontWeight: 'bold',
+                                        fontSize: 30,
+                                        textAlign: 'auto',
+                                        transform: [{ rotate: '-90deg' }],
+                                        marginBottom: 200,
+                                        marginTop: -260
+                                    }}> {`${selectedparking.parkingSpots.length - reservedSpots.length
+                                        } SPOTS FREE `}</Text>
+                                    <Image source={car1} style={{ width: 60, height: 60 }} />
+                                    <AntDesign name='arrowup' style={{ fontSize: 20, marginBottom: 10 }} />
+                                    <Text style={{ fontSize: 16, color: '#90EE90', fontWeight: 'bold', marginBottom: 20 }}>ENTRY</Text>
+
+                                </View>
+                                <View>
+  <Pressable
+    style={styles.continueBtn}
+    onPress={() => {
+      if (selectedSpot) {
+        // Si une place est sélectionnée, changez l'étape
+        setCurrentStep('reservation');
+      } else {
+        // Si aucune place n'est sélectionnée, affichez un message
+        alert("Veuillez sélectionner une place avant de réserver.");
+      }
+    }}
+  >
+    <Text style={styles.continueTxt}>BOOK</Text>
+  </Pressable>
+</View>
+
+
                             </View>
-                        }
+
+                        )}
+
+
+
+
 
                         {
                             currentStep == "reservation" &&
@@ -445,6 +554,7 @@ export default function Reservation({ navigation, selectedparking, setNoParking 
                                     </Picker>
                                 </View>
 
+
                                 <TextInput
                                     placeholder={t("Licence Plate ...")}
                                     value={licencePlate}
@@ -452,7 +562,8 @@ export default function Reservation({ navigation, selectedparking, setNoParking 
                                     style={{ ...styles.searchInput, margin: 10, padding: 10 }}
                                 />
                                 <View style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
-                                    <Pressable style={{ ...styles.button, backgroundColor: "#65e787" }} onPress={createReservation}>
+                                    <Pressable style={{ ...styles.button, backgroundColor: "#65e787" }} onPress={createReservation}
+                                    >
                                         <Text style={{ marginBottom: 5, marginRight: 5 }}> <Image
                                             style={{
                                                 width: 25,
@@ -463,31 +574,71 @@ export default function Reservation({ navigation, selectedparking, setNoParking 
                                         />{t("book")}</Text>
                                     </Pressable>
                                 </View>
-                                <View style={{ display: "flex", alignItems: "center" , width: Dimensions.get('window').width * 0.9 }}>
+                                <View style={{ display: "flex", alignItems: "center", width: Dimensions.get('window').width * 0.9 }}>
 
-                                    <Text style={{ margin:10, fontSize: 24, fontWeight: "bold" }}>{t("Spot QR Code")}</Text>
+                                    <Text style={{ margin: 10, fontSize: 24, fontWeight: "bold" }}>{t("Spot QR Code")}</Text>
                                     <QRCode
                                         value={selectedSpot._id}
                                         size={200}
                                     />
                                 </View>
+
                             </View>
                         }
                     </ScrollView>
 
 
-                </View>}
+                </View >}
+
+
 
             {
                 !SpotType && <View style={{ display: "flex", flexDirection: "row", justifyContent: "center", marginTop: Dimensions.get('window').height * 0.1, flexWrap: "wrap" }}>
                     {spotTypesButtons.map(renderCard)}
                 </View>
             }
-        </View>
+        </View >
     )
 }
 
 const styles = StyleSheet.create({
+    heading: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 13,
+    },
+    card: {
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        margin: 10,
+
+
+
+        // Ajoutez d'autres styles au besoin
+    },
+    shadowProp: {
+        elevation: 15, // contrôle l'élévation de la boîte d'ombre sur Android
+        shadowOffset: { width: 0, height: 10 },
+        shadowRadius: 10,
+        shadowOpacity: 0.3,
+        borderTopWidth: 0,
+        width: '300px',
+    },
+    continueBtn: {
+        backgroundColor: '#0C2D57',
+        paddingVertical: 15,
+        paddingHorizontal: 30,
+        marginHorizontal: 5,
+        borderRadius: 10,
+
+        alignItems: 'center',
+    },
+    continueTxt: {
+        fontSize: 20,
+        color: '#fff',
+        textAlign: 'center',
+    },
     searchInput: {
         paddingLeft: 5,
         borderRadius: 8,
@@ -503,6 +654,19 @@ const styles = StyleSheet.create({
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').height * 1,
     },
+
+    changeDesignButton: {
+        marginTop: 20,
+        backgroundColor: '#0C2D57',
+        padding: 15,
+        borderRadius: 10,
+    },
+    changeDesignButtonText: {
+        color: 'white',
+        fontSize: 16,
+        alignSelf: 'center',
+    },
+
     searchZone: {
         position: 'absolute',
         bottom: 20,
@@ -552,14 +716,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 22,
     },
-    backButton: {
-        width: 150,
-        marginLeft: 16,
-        marginTop: 50,
-        backgroundColor: "black",
-        borderRadius: 8,
-        color: "#FFF",
-    },
+
     modalView: {
         margin: 20,
         backgroundColor: 'white',

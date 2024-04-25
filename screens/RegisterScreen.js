@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
   StyleSheet,
+  Button,
   Text,
   View,
   SafeAreaView,
@@ -15,7 +17,7 @@ import {
   Platform
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import registerimg from '../assets/Register.jpg';
 import { MaterialIcons, AntDesign, Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
@@ -23,9 +25,12 @@ import logo from "../assets/avatar.png";
 import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from 'react-i18next';
 import config from "../config";
+
+
 const RegisterScreen = () => {
   const navigation = useNavigation();
-  const { t  } = useTranslation();
+  const { t } = useTranslation();
+
 
   const [image, setImage] = useState(null);
   const [isImagePickerVisible, setImagePickerVisible] = useState(false);
@@ -46,6 +51,8 @@ const RegisterScreen = () => {
       }
     })();
   }, []);
+
+
 
   const handleRegister = () => {
     const user = {
@@ -89,7 +96,7 @@ const RegisterScreen = () => {
         axios.post(`${config.api}/api/auth/signin`, { email, password }).then(result => {
           AsyncStorage.setItem("user", JSON.stringify(result.data));
           setTimeout(() => {
-            navigation.navigate("RegisterContinue",{email,username:name});
+            navigation.navigate("RegisterContinue", { email, username: name });
 
             setName("");
             setEmail("");
@@ -108,7 +115,7 @@ const RegisterScreen = () => {
       });
   };
 
-  const choisirImage = async () => {};
+  const choisirImage = async () => { };
 
   const selectImageFromLibrary = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -178,115 +185,125 @@ const RegisterScreen = () => {
     setImagePickerVisible(false);
   };
 
+
   return (
-     <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="never"
+    <SafeAreaView style={styles.container}>
+
+
+      <View>
+        <Image source={registerimg} style={{ width: 300, height: 300, top: 50 }}></Image>
+      </View>
+
+      <View style={styles.imagePickerContainer}>
+        <TouchableOpacity
+          style={styles.imagePicker}
+          onPress={() => setImagePickerVisible(true)}
         >
-        <View style={styles.imagePickerContainer}>
+          <Image source={image ? { uri: image } : logo} style={styles.image} >
+
+          </Image>
+
+        </TouchableOpacity>
+
+      </View>
+
+
+
+
+      <Modal visible={isImagePickerVisible} transparent={true}>
+        <View style={styles.imagePickerModal}>
           <TouchableOpacity
-            style={styles.imagePicker}
-            onPress={() => setImagePickerVisible(true)}
+            style={styles.imagePickerOption}
+            onPress={selectImageFromLibrary}
           >
-            <Image source={image ? { uri: image } : logo} style={styles.image} />
+            <Text style={styles.buttonText}>{t("Choose from gallery")}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.imagePickerOption}
+            onPress={takePhoto}
+          >
+            <Text style={styles.buttonText}>{t("To take a picture")}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={hideImagePicker}
+          >
+            <Text style={styles.buttonText}>{t("Cancel")}</Text>
           </TouchableOpacity>
         </View>
+      </Modal>
 
-        <Modal visible={isImagePickerVisible} transparent={true}>
-          <View style={styles.imagePickerModal}>
-            <TouchableOpacity
-              style={styles.imagePickerOption}
-              onPress={selectImageFromLibrary}
-            >
-              <Text style={styles.buttonText}>{t("Choose from gallery")}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.imagePickerOption}
-              onPress={takePhoto}
-            >
-              <Text style={styles.buttonText}>{t("To take a picture")}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={hideImagePicker}
-            >
-              <Text style={styles.buttonText}>{t("Cancel")}</Text>
-            </TouchableOpacity>
+      <KeyboardAvoidingView behavior="padding">
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>{t("Registering for your account")}</Text>
+
+          <View style={styles.inputContainer}>
+            <Ionicons
+              style={styles.icon}
+              name="person"
+              size={24}
+              color="gray"
+            />
+            <TextInput
+              value={name}
+              onChangeText={(text) => setName(text)}
+              placeholderTextColor={"gray"}
+              style={styles.input}
+              placeholder={t("Enter your name")}
+            />
           </View>
-        </Modal>
 
-        <KeyboardAvoidingView behavior="padding">
-          <View style={styles.formContainer}>
-            <Text style={styles.title}>{t("Registering for your account")}</Text>
-
-            <View style={styles.inputContainer}>
-              <Ionicons
-                style={styles.icon}
-                name="person"
-                size={24}
-                color="gray"
-              />
-              <TextInput
-                value={name}
-                onChangeText={(text) => setName(text)}
-                placeholderTextColor={"gray"}
-                style={styles.input}
-                placeholder={t("Enter your name")}
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <MaterialIcons
-                style={styles.icon}
-                name="email"
-                size={24}
-                color="gray"
-              />
-              <TextInput
-                value={email}
-                onChangeText={(text) => setEmail(text)}
-                placeholderTextColor={"gray"}
-                style={styles.input}
-                placeholder={t("Enter your e-mail adress")}
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <AntDesign
-                style={styles.icon}
-                name="lock"
-                size={24}
-                color="gray"
-              />
-              <TextInput
-                secureTextEntry={true}
-                value={password}
-                onChangeText={(text) => setPassword(text)}
-                placeholderTextColor={"gray"}
-                style={styles.input}
-                placeholder={t("Enter your password")}
-              />
-            </View>
-
-            <Pressable
-              onPress={handleRegister}
-              style={styles.registerButton}
-            >
-              <Text style={styles.registerButtonText}>{t("Register")}</Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() => navigation.goBack()}
-              style={styles.loginLink}
-            >
-              <Text style={styles.loginLinkText}>
-                {t("Already have an account ?")} {t("Login")}
-              </Text>
-            </Pressable>
+          <View style={styles.inputContainer}>
+            <MaterialIcons
+              style={styles.icon}
+              name="email"
+              size={24}
+              color="gray"
+            />
+            <TextInput
+              value={email}
+              onChangeText={(text) => setEmail(text)}
+              placeholderTextColor={"gray"}
+              style={styles.input}
+              placeholder={t("Enter your e-mail adress")}
+            />
           </View>
-        </KeyboardAvoidingView>
-      </ScrollView>
+
+          <View style={styles.inputContainer}>
+            <AntDesign
+              style={styles.icon}
+              name="lock"
+              size={24}
+              color="gray"
+            />
+            <TextInput
+              secureTextEntry={true}
+              value={password}
+              onChangeText={(text) => setPassword(text)}
+              placeholderTextColor={"gray"}
+              style={styles.input}
+              placeholder={t("Enter your password")}
+            />
+          </View>
+
+          <Pressable
+            onPress={handleRegister}
+            style={styles.registerButton}
+          >
+            <Text style={styles.registerButtonText}>{t("Register")}</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => navigation.goBack()}
+            style={styles.loginLink}
+          >
+            <Text style={styles.loginLinkText}>
+              {t("Already have an account ?")} <Text style={{ textDecorationLine: 'underline', color: '#007FFF', justifyContent: 'center' }}>{t("Login")}</Text>
+            </Text>
+          </Pressable>
+        </View>
+      </KeyboardAvoidingView>
+
     </SafeAreaView>
   );
 };
@@ -322,7 +339,7 @@ const styles = StyleSheet.create({
     height: undefined,
   },
   imagePickerModal: {
-    backgroundColor: "rgba(0, 0, 0, 0.8)" ,
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
     padding: 20,
     borderRadius: 10,
     width: "80%",
@@ -350,6 +367,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
+    top: -50
   },
   title: {
     fontSize: 18,

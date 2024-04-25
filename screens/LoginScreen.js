@@ -25,7 +25,7 @@ import 'intl-pluralrules';
 const { width } = Dimensions.get("window"); // Obtenez la largeur de l'écran
 
 const LoginScreen = () => {
-  const { t ,i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,15 +35,15 @@ const LoginScreen = () => {
     const checkLoginStatus = async () => {
       try {
         const lg = await AsyncStorage.getItem('appLanguage');
-        if(lg){
+        if (lg) {
           i18n.changeLanguage(lg)
-        }else{
+        } else {
           setTimeout(() => {
             navigation.replace("LanguageSelection");
           }, 400);
         }
       } catch (error) {
-        
+
       }
 
       try {
@@ -143,8 +143,9 @@ const LoginScreen = () => {
           onPress={() => navigation.navigate("Register")}
           style={styles.registerButton}
         >
+
           <Text style={styles.registerButtonText}>
-            {t("You do not have an account ?")} {t("Register")}
+            <Text>{t("You do not have an account ?")}</Text ><Text style={{ textDecorationLine: 'underline', color: '#007FFF', justifyContent: 'center' }}> {t("Register")}</Text>
           </Text>
         </Pressable>
       </ScrollView>

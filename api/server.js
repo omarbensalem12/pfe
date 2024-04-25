@@ -1,3 +1,4 @@
+
 const express = require("express");
 const cors = require("cors");
 const cookieSession = require("cookie-session");
@@ -6,6 +7,7 @@ const http = require('http');
 const socketIO = require('socket.io');
 const dbConfig = require("./app/config/db.config");
 const morgan = require('morgan')
+
 
 
 const app = express();
@@ -104,10 +106,12 @@ function initial() {
       }).save(err => {
         if (err) {
           console.log("error", err);
+
         }
 
         console.log("added 'user' to roles collection");
       });
+
 
       new Role({
         name: "driver"
