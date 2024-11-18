@@ -66,9 +66,6 @@ export default function Reservation({ navigation, selectedparking, setNoParking 
     const [Starttime, setStarttime] = useState(new Date());
     const [finishDate, setfinishDate] = useState(new Date());
     const [finishTime, setfinishTime] = useState(new Date());
-
-
-
     const getStart = () => {
         const hour = Starttime.getHours() < 10 ? "0" + Starttime.getHours() : Starttime.getHours()
         const minute = Starttime.getMinutes() < 10 ? "0" + Starttime.getMinutes() : Starttime.getMinutes()
@@ -134,7 +131,6 @@ export default function Reservation({ navigation, selectedparking, setNoParking 
 
         })
     }
-
 
     const renderCard = (button) => (
         <TouchableOpacity
@@ -289,8 +285,6 @@ export default function Reservation({ navigation, selectedparking, setNoParking 
                     </View>}
 
                     <ScrollView style={{ height: Dimensions.get('window').height * 0.9 }}>
-                        {
-                            currentStep == "search" &&
 
                             <View style={{ width: Dimensions.get('window').width * 0.9 }}>
 
@@ -400,13 +394,7 @@ export default function Reservation({ navigation, selectedparking, setNoParking 
                                         //         {t("spotType")} : {el.spotType}
                                         //     </Text> */}
 
-                                        //         </View>
 
-                                        //     </View>
-                                        //     // <Text key={el._id}>
-                                        //     //     {JSON.stringify(el)}
-                                        //     // </Text>
-                                        // )
                                     })}
                             </View>
                         }
